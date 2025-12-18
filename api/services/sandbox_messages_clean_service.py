@@ -339,7 +339,7 @@ class SandboxMessagesCleanService:
             tenant_id = app_to_tenant.get(msg.app_id)
             if not tenant_id:
                 continue
-            
+
             # Skip tenant messages in whitelist
             if tenant_id in tenant_whitelist:
                 continue
