@@ -14,6 +14,11 @@ from core.workflow.graph import NodeFactory
 from core.workflow.nodes.base.node import Node
 from core.workflow.nodes.code.code_node import CodeNode
 from core.workflow.nodes.code.limits import CodeNodeLimits
+from core.workflow.nodes.template_transform.template_renderer import (
+    CodeExecutorJinja2TemplateRenderer,
+    Jinja2TemplateRenderer,
+)
+from core.workflow.nodes.template_transform.template_transform_node import TemplateTransformNode
 from core.workflow.nodes.http_request.executor import FileManagerProtocol, HttpClientProtocol
 from core.workflow.nodes.http_request.node import HttpRequestNode
 from libs.typing import is_str, is_str_dict
@@ -42,6 +47,7 @@ class DifyNodeFactory(NodeFactory):
         code_executor: type[CodeExecutor] | None = None,
         code_providers: Sequence[type[CodeNodeProvider]] | None = None,
         code_limits: CodeNodeLimits | None = None,
+        template_renderer: Jinja2TemplateRenderer | None = None,
         http_request_http_client: HttpClientProtocol = ssrf_proxy,
         http_request_tool_file_manager_factory: Callable[[], ToolFileManager] = ToolFileManager,
         http_request_file_manager: FileManagerProtocol = file_manager,
@@ -62,6 +68,7 @@ class DifyNodeFactory(NodeFactory):
             max_string_array_length=dify_config.CODE_MAX_STRING_ARRAY_LENGTH,
             max_object_array_length=dify_config.CODE_MAX_OBJECT_ARRAY_LENGTH,
         )
+        self._template_renderer = template_renderer or CodeExecutorJinja2TemplateRenderer()
         self._http_request_http_client = http_request_http_client
         self._http_request_tool_file_manager_factory = http_request_tool_file_manager_factory
         self._http_request_file_manager = http_request_file_manager
@@ -116,6 +123,15 @@ class DifyNodeFactory(NodeFactory):
                 code_executor=self._code_executor,
                 code_providers=self._code_providers,
                 code_limits=self._code_limits,
+            )
+
+        if node_type == NodeType.TEMPLATE_TRANSFORM:
+            return TemplateTransformNode(
+                id=node_id,
+                config=node_config,
+                graph_init_params=self.graph_init_params,
+                graph_runtime_state=self.graph_runtime_state,
+                template_renderer=self._template_renderer,
             )
 
         if node_type == NodeType.HTTP_REQUEST:
