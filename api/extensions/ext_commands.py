@@ -4,8 +4,8 @@ from dify_app import DifyApp
 def init_app(app: DifyApp):
     from commands import (
         add_qdrant_index,
-        clean_workflow_runs,
         clean_expired_sandbox_messages,
+        clean_workflow_runs,
         cleanup_orphaned_draft_variables,
         clear_free_plan_tenant_expired_logs,
         clear_orphaned_file_records,
